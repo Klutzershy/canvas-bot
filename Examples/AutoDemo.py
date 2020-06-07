@@ -1,10 +1,10 @@
-from CanvasBot import CanvasBot
+from src.CanvasBot import CanvasBot
 from getpass import getpass
 
 user = input("Username:")
 passW = getpass()
 
-new_bot = CanvasBot()
+new_bot = CanvasBot(manual_login=False)
 new_bot.set_link("<CANVAS LINK>") # enter the link to the login page for your Canvas
 new_bot.get_link()
 new_bot.login(user, passW)

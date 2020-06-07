@@ -15,7 +15,7 @@ class CanvasBot:
 	#  browser: web driver element with user-chosen options - overrides the "head" parameter
 	#  head: uses headless browser if false
 	#  manual_login: waits for user to navigate to their canvas dashboard (within the same tab) before beginning script.
-	def __init__(self, browser=None, head=False, manual_login=False):
+	def __init__(self, browser=None, head=False, manual_login=True):
 		self.start_time = time.perf_counter()
 		if browser is None:
 			chrome_options = Options()
@@ -25,7 +25,7 @@ class CanvasBot:
 			chrome_options.add_argument("--disable-gpu")
 			chrome_options.add_argument("keep-alive")
 			self.start_load = time.perf_counter()
-			self.browser = webdriver.Chrome(executable_path="./driver/chromedriver", options=chrome_options)
+			self.browser = webdriver.Chrome(executable_path="../driver/chromedriver", options=chrome_options)
 			self.load_time = time.perf_counter() - self.start_load
 		else:
 			self.browser = browser
