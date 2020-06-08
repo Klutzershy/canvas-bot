@@ -1,7 +1,7 @@
 from src.CanvasBot import CanvasBot
 
 # In the opened window, login to your Canvas account ON THE INITIAL TAB. Process will start automatically.
-new_bot = CanvasBot(head=True)
+new_bot = CanvasBot()
 
 assignments = new_bot.fetch_upcoming()
 new_bot.print_assignments()

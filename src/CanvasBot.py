@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from webdriver_manager.chrome import ChromeDriverManager
 
 import time
 
@@ -15,7 +16,7 @@ class CanvasBot:
 	#  browser: web driver element with user-chosen options - overrides the "head" parameter
 	#  head: uses headless browser if false
 	#  manual_login: waits for user to navigate to their canvas dashboard (within the same tab) before beginning script.
-	def __init__(self, browser=None, head=False, manual_login=True):
+	def __init__(self, browser=None, head=True, manual_login=True):
 		self.start_time = time.perf_counter()
 		if browser is None:
 			chrome_options = Options()
@@ -25,7 +26,7 @@ class CanvasBot:
 			chrome_options.add_argument("--disable-gpu")
 			chrome_options.add_argument("keep-alive")
 			self.start_load = time.perf_counter()
-			self.browser = webdriver.Chrome(executable_path="../driver/chromedriver", options=chrome_options)
+			self.browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 			self.load_time = time.perf_counter() - self.start_load
 		else:
 			self.browser = browser
@@ -46,6 +47,7 @@ class CanvasBot:
 		self.link = link
 
 	def get_link(self):
+		self.start_load = time.perf_counter()
 		self.browser.get(self.link)
 		self.load_time += time.perf_counter() - self.start_load
 
