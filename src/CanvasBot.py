@@ -7,16 +7,19 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+
+
 
 import time
 
 
 class CanvasBot:
-	#  parameters:
+        #  parameters:
 	#  browser: web driver element with user-chosen options - overrides the "head" parameter
 	#  head: uses headless browser if false
 	#  manual_login: waits for user to navigate to their canvas dashboard (within the same tab) before beginning script.
-	def __init__(self, browser=None, head=True, manual_login=True):
+	def __init__(self, browser=None, head=True, manual_login=True,browser_type=None):
 		self.start_time = time.perf_counter()
 		if browser is None:
 			chrome_options = Options()
@@ -26,14 +29,21 @@ class CanvasBot:
 			chrome_options.add_argument("--disable-gpu")
 			chrome_options.add_argument("keep-alive")
 			self.start_load = time.perf_counter()
-			self.browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+			if browser_type == "1":
+				self.browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+			elif browser_type == "2":
+				self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+			else:
+				print("No supported browser was selected. Exiting...")
+				exit(1)
+
 			self.load_time = time.perf_counter() - self.start_load
 		else:
 			self.browser = browser
 		self.order = [1, 2, 3, 4, 5, 6, 7]
 		self.assignments = []
 		self.start_load = time.perf_counter()
-		self.link = "<CANVAS LOGIN LINK>"
+		self.link = "https://login.rowan.edu/cas/login?service=https%3A%2F%2Frowan.instructure.com%2Flogin%2Fcas"
 		if manual_login:
 			WebDriverWait(self.browser, 1000).until(ec.presence_of_element_located((By.ID, "DashboardCard_Container")))
 			self.start_time = time.perf_counter()
@@ -65,7 +75,7 @@ class CanvasBot:
 	def __waitUntilLoad(self, by, string):
 		self.start_load = time.perf_counter()
 		try:
-			element = WebDriverWait(self.browser, 5).until(ec.presence_of_element_located((by, string)))
+			element = WebDriverWait(self.browser, 40).until(ec.presence_of_element_located((by, string)))
 		except TimeoutException:
 			print("Loading took too long. You'll have to check this class manually.")
 			element = False
@@ -143,4 +153,3 @@ class CanvasBot:
 
 	def restart(self, browser):
 		self.__init__(browser)
-
