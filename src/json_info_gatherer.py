@@ -9,9 +9,13 @@ token_file = "canvas_auth_token.txt"
 
 with open(token_file,'r') as file: API_TOKEN = file.read()
 
-courses = requests.get(url="https://rowan.instructure.com/api/v1/courses?access_token={}".format(API_TOKEN))
-
-json_courses = courses.json()
+#Will attempt to parse the response to json, should print out an error if it fails
+try:
+    courses = requests.get(url="https://rowan.instructure.com/api/v1/courses?access_token={}".format(API_TOKEN))
+    json_courses = courses.json()
+except:
+    print("An error occured: {}".format(courses))
+    exit(1)
 
 def gather_info():
     info_result = None
@@ -27,9 +31,13 @@ def gather_info():
 
     #Loop through list of courses
     for course in course_list:
-        result = requests.get(url="https://rowan.instructure.com/api/v1/courses/{id}/assignments?access_token={api}".format(id=course['id'], api=API_TOKEN))
+        try:
+            result = requests.get(url="https://rowan.instructure.com/api/v1/courses/{id}/assignments?access_token={api}".format(id=course['id'], api=API_TOKEN))
 
-        json_results = result.json()
+            json_results = result.json()
+        except:
+            print("An error occured accessing course: {} {}".format(course['name'],result))
+            exit(1)
         print("Course: {}".format(course['name']))
         assignment_list=[]
         for i in json_results:
