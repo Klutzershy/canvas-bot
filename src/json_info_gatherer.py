@@ -5,7 +5,7 @@ from datetime import timezone
 course_list=[]
 
 #This assumes you are working on Windows, change the \ to / if you are on Mac/Linux
-token_file = "..\canvas_auth_token.txt"
+token_file = "canvas_auth_token.txt"
 
 with open(token_file,'r') as file: API_TOKEN = file.read()
 
