@@ -35,9 +35,9 @@ def gather_info():
         for i in json_results:
             assignment_name = i.get("name")
             due_date = i.get("due_at")
-            #Time is currently UTC, haven't bothered with switching to EST yet
+            #Time is converted from utc to local time
             formatted_due_date = dt.datetime.strptime(due_date,"%Y-%m-%dT%H:%M:%SZ")
-
+            formatted_due_date = formatted_due_date.replace(tzinfo=timezone.utc).astimezone(tz=None)
             print("Name: {}".format(assignment_name))
             print("Due: {}".format(formatted_due_date))
             assignment_list.append({"name":assignment_name,"due_date":formatted_due_date})
