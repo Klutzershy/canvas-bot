@@ -52,7 +52,7 @@ def insert_user(user):
     row = select_user(user[0])
     if row is None:
         sql = ''' INSERT INTO users(username, password_hash, password_salt, email_address)
-              VALUES(\"{uname}\",\" {pw_hash}\", {pw_salt}, \"{email}\") '''.format(uname = user[0], pw_hash = user[1], pw_salt = user[2], email = user[3])
+              VALUES(?,?,?,?) '''
         cur.execute(sql, user)
         conn.commit()
 
@@ -62,11 +62,9 @@ def insert_preferences(preferences):
     cur.execute("SELECT * FROM preferences WHERE user_id = {id}".format(id = preferences[0]))
     row = cur.fetchone()
     if row is None:
-        print("Adding preferences for user_id {}".format(preferences[0]))
         sql = ''' INSERT INTO preferences(user_id, reminder_time)
               VALUES({id}, {rem_time}) '''.format(id = preferences[0], rem_time = preferences[1])
     else:
-        print("Updating preferences for user_id {}".format(preferences[0]))
         sql = ''' UPDATE preferences SET reminder_time = {rem_time} 
               WHERE user_id = {id}'''.format(rem_time = preferences[1], id = preferences[0])
     cur.execute(sql)
@@ -78,7 +76,6 @@ def insert_course(course):
     cur.execute("SELECT * FROM courses WHERE user_id = {id} AND name = \"{name}\"".format(id = course[0], name = course[1]))
     row = cur.fetchone()
     if row is None:
-        print("Adding new course for user_id {}".format(course[0]))
         sql = ''' INSERT INTO courses(user_id, name)
               VALUES({id}, \"{course_name}\") '''.format(id = course[0], course_name = course[1])
         cur.execute(sql)
@@ -90,11 +87,9 @@ def insert_assignment(assignment):
     cur.execute("SELECT * FROM assignments WHERE course_id = {id} AND title = \"{name}\"".format(id = assignment[0], name = assignment[1]))
     row = cur.fetchone()
     if row is None:
-        print("Adding new assignment for course id {}".format(assignment[0]))
         sql = ''' INSERT INTO assignments(course_id, title, due_date)
               VALUES({id}, \"{title}\", \"{due_date}\") '''.format(id = assignment[0], title = assignment[1], due_date = assignment[2])
     else:
-        print("Updating assignments for course_id {}".format(assignment[0]))
         sql = ''' UPDATE assignments SET due_date = \"{due_date}\" 
               WHERE course_id = {id} AND title = \"{title}\"'''.format(due_date = assignment[2], id = assignment[0], title = assignment[1])
     cur.execute(sql)
@@ -132,16 +127,29 @@ def verify_credentials(username, password):
 
 def get_user_assignments(username):
     user = select_user(username)
-    print(user)
     if user is not None:
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM courses WHERE user_id = \"{uname}\"".format(uname = user[1]))
+        cur.execute('''SELECT courses.name, assignments.title, assignments.due_date FROM assignments 
+                    INNER JOIN courses ON assignments.course_id = courses.id 
+                    WHERE user_id = {id}'''.format(id = user[0]))
         courses = cur.fetchall()
-        for course in courses:
-            print(course)
+        return courses
+    else:
+        return None
 
-    
+def get_user_preferences(username):
+    user = select_user(username)
+    if user is not None:
+        conn = sqlite3.connect(db_file)
+        cur = conn.cursor()
+        cur.execute('''SELECT users.username, preferences.reminder_time FROM preferences 
+                    INNER JOIN users ON preferences.user_id = users.id 
+                    WHERE user_id = {id}'''.format(id = user[0]))
+        preferences = cur.fetchone()
+        return preferences
+    else:
+        return None
 
 def init():
     # create a database connection
@@ -151,7 +159,7 @@ def init():
                                         id integer PRIMARY KEY,
                                         username text NOT NULL,
                                         password_hash text NOT NULL,
-                                        password_salt integer NOT NULL,
+                                        password_salt text NOT NULL,
                                         email_address text NOT NULL
                                     ); """
 
@@ -182,51 +190,6 @@ def init():
     create_table(sql_create_preferences_table)
     create_table(sql_create_courses_table)
     create_table(sql_create_assignments_table)
-
-    # insert sample data
-
-    # insert sample users
-    sample_username1 = "jeffersod2"
-    sample_password1 = "Baseball1996!"
-    create_user(sample_username1, sample_password1)
-    sample_username2 = "randerson1"
-    sample_password2 = "Football1965!"
-    create_user(sample_username2, sample_password2)
-
-    # set preferences
-    reminder_time = 86400   # 1 day before due date
-    create_preferences(sample_username2, reminder_time)
-    reminder_time = 1209600   # 2 weeks before due date
-    create_preferences(sample_username1, reminder_time)
-
-    # insert sample courses
-    sample_course_name1 = "Adv. Software Engineering"
-    create_course(sample_username1, sample_course_name1)
-    sample_course_name2 = "Concepts of Artificial Intelligence"
-    create_course(sample_username1, sample_course_name2)
-    sample_course_name3 = "History of Broadcast Media"
-    create_course(sample_username2, sample_course_name3)
-    
-    # insert sample assignments
-    sample_assignment_title1 = "Group Assignment 3 - Implementation&Testing"
-    sample_assignment_due_date1 = "2020-08-25 03:59:00"
-    create_assignment(sample_course_name1, sample_assignment_title1, sample_assignment_due_date1)
-    sample_assignment_title2 = "Log 5"
-    sample_assignment_due_date2 = "2020-08-12 03:59:00"
-    create_assignment(sample_course_name1, sample_assignment_title2, sample_assignment_due_date2)
-    sample_assignment_title3 = "Final Project"
-    sample_assignment_due_date3 = "2020-08-21 11:59:00"
-    create_assignment(sample_course_name3, sample_assignment_title3, sample_assignment_due_date3)
-
-    # test
-    incorrect_password = "Sloshfest02"
-    correct_password = "Baseball1996!"
-    print("false password checked: {}".format(verify_credentials(sample_username1, incorrect_password)))
-    print("correct password checked: {}".format(verify_credentials(sample_username1, correct_password)))
-
-    #print(get_user_assignments(sample_username1))
-    #print(get_user_assignments(sample_username2))
-
 
 
 if __name__ == '__main__':
