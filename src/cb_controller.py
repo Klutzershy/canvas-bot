@@ -1,27 +1,42 @@
 import datetime as dt
 import requests
 from datetime import timezone
+import canvasbotdb
 
 course_list=[]
+test_user_name = "username"
+#canvasbotdb.init()
 
-#This assumes you are working on Windows, change the \ to / if you are on Mac/Linux
-token_file = "canvas_auth_token.txt"
+def register_user():
+    canvasbotdb.create_user(test_user_name,"Test2")
+    token="token_here"
+    gather_info(token)
+    
 
-with open(token_file,'r') as file: API_TOKEN = file.read()
+def login_user(user_login_info):
+    canvasbotdb.verify_credentials(user_login_info[0],user_login_info[1])
+    
 
-#Will attempt to parse the response to json, should print out an error if it fails
-try:
-    courses = requests.get(url="https://rowan.instructure.com/api/v1/courses?access_token={}".format(API_TOKEN))
-    json_courses = courses.json()
-except:
-    print("An error occured: {}".format(courses))
-    exit(1)
+def update_preferences(user_login_info,preference):
+    canvasbotdb.verify_credentials(user_login_info[0],user_login_info[1])
+    canvasbotdb.create_preferences(user_login_info[0],preference)
 
-def gather_info():
+def gather_info(API_TOKEN):
     info_result = None
+    
+    #Will attempt to parse the response to json, should print out an error if it fails
+    try:
+        courses = requests.get(url="https://rowan.instructure.com/api/v1/courses?access_token={}".format(API_TOKEN))
+        json_courses = courses.json()
+    except:
+        print("An error occured: {}".format(courses))
+        exit(1)
+
+
     for jcourse in json_courses:
         course_id = jcourse.get("id")
         course_name = jcourse.get("name")
+        
         #Appears to grab other courses that are not visible anymore and are set as None.
         #Not adding the None courses because there is nothing to grab.
         if course_name == None:
@@ -38,9 +53,13 @@ def gather_info():
         except:
             print("An error occured accessing course: {} {}".format(course['name'],result))
             exit(1)
-        print("Course: {}".format(course['name']))
+        
+        #Create a course
+        canvasbotdb.create_course(test_user_name,course["name"])
+        print("Course: {}".format(course["name"]))
         assignment_list=[]
         for i in json_results:
+            #Get the assignment name and due date
             assignment_name = i.get("name")
             due_date = i.get("due_at")
             #Time is converted from utc to local time
@@ -48,7 +67,11 @@ def gather_info():
             formatted_due_date = formatted_due_date.replace(tzinfo=timezone.utc).astimezone(tz=None)
             print("Name: {}".format(assignment_name))
             print("Due: {}".format(formatted_due_date))
+            #Insert Assignment into the 
+            canvasbotdb.create_assignment(course["name"],assignment_name,formatted_due_date)
             assignment_list.append({"name":assignment_name,"due_date":formatted_due_date})
         course.update({"assignments":assignment_list})
     info_result = course_list
     return info_result
+register_user()
+login_user([test_user_name,"Test2"])
