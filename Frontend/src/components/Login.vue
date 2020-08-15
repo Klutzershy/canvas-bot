@@ -32,6 +32,7 @@
                           name="login"
                           prepend-icon="mdi-account"
                           type="text"
+                          v-model="username"
                   ></v-text-field>
 
                   <v-text-field
@@ -40,13 +41,14 @@
                           name="password"
                           prepend-icon="mdi-lock"
                           type="password"
+                          v-model="password"
                   ></v-text-field>
                 </v-form>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <Preferences/>
-                <register/>
+                <Preferences :username="username" :password="password" @notify="$emit('notify', $event)" />
+                <register @notify="$emit('notify', $event)" />
               </v-card-actions>
             </v-card>
           </v-col>
@@ -60,6 +62,10 @@
   import Register from "./Register";
   import Preferences from "./Preferences";
   export default {
+    data: () => ({
+      username: "",
+      password: "",
+    }),
     components: {Preferences, Register},
     props: {
       source: String,

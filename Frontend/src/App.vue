@@ -28,23 +28,34 @@
     </v-app-bar>
 
     <v-main>
-      <Login/>
+      <Login @notify="notify($event)" />
+      <Notification ref="notification"/>
     </v-main>
   </v-app>
 </template>
 
 <script>
 import Login from './components/Login';
+import Notification from "./components/Notification";
 
 export default {
   name: 'App',
 
   components: {
+    Notification,
     Login,
   },
 
   data: () => ({
     //
   }),
+
+  methods: {
+    notify(event) {
+      const args = event.split(",");
+      this.$refs.notification.show_notification(args[0], args[1]);
+    }
+  }
+
 };
 </script>
