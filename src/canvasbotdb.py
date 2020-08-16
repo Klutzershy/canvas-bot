@@ -24,11 +24,11 @@ def create_table(create_table_sql):
         print(e)
         return False
 
-def create_user(username, password):
+def create_user(username, password, email):
     password = password.encode()
     salt = os.urandom(16)
     password_hash = hashlib.pbkdf2_hmac("sha256", password, salt, 100000)
-    user = (username, password_hash, salt, "{short}@students.rowan.edu".format(short = username))
+    user = (username, password_hash, salt, email)
     ret_val = insert_user(user)
     return ret_val
 
