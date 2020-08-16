@@ -26,7 +26,7 @@
                                 <v-text-field label="Email*" prepend-icon="mdi-at" id="email" required></v-text-field>
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field label="Password*" type="password" prepend-icon="mdi-lock" id="password" required></v-text-field>
+                                <v-text-field label="Password*" type="password" prepend-icon="mdi-lock" id="pass" required></v-text-field>
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field label="Confirm Password*" type="password" prepend-icon="mdi-lock" id="confirm_password" required></v-text-field>
@@ -96,7 +96,7 @@
                 let verified = true;
                 let username = document.getElementById("username").value;
                 let email = document.getElementById("email").value;
-                let password = document.getElementById("password").value;
+                let password = document.getElementById("pass").value;
                 let confirm_password = document.getElementById("confirm_password").value;
 
                 if(username == "" || password == "") {
@@ -131,13 +131,18 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            this.registration_dialog = false;
-                            this.$emit('notify', 'Registration successful!,success');
+                            if(!response.success) {
+                                this.loading_dialog = false;
+                                this.$emit('notify', 'Registration failed - please try again!,error');
+                            } else {
+                                this.registration_dialog = false;
+                                this.$emit('notify', 'Registration successful!,success');
+                            }
                         })
                         .catch(e => {
-                            this.errors.push(e)
+                            this.errors.push(e);
                             this.loading_dialog = false;
-                            this.$emit('notify', 'Registration failed, please try again!,error');
+                            this.$emit('notify', 'Registration failed please try again!,error');
                         })
                 }
             }

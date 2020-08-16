@@ -11,7 +11,7 @@
                             class="subtitle-1 text-center"
                             cols="12"
                     >
-                        Logging you in, please wait
+                        {{ loading_text }}
                     </v-col>
                     <v-col cols="6">
                         <v-progress-linear
@@ -54,10 +54,10 @@
                             </v-col>
                         </v-row>
                     </v-container>
-                    <small>*indicates required field</small>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
+                    <courses :course_info="course_info"/>
                     <v-btn color="blue darken-1" text @click="post">Update Preferences</v-btn>
                 </v-card-actions>
             </v-card>
@@ -68,13 +68,99 @@
 
 <script>
     import axios from 'axios';
+    import Courses from "./Courses";
 
     export default {
+        components: {Courses},
         data: () => ({
             loading_dialog: false,
             preferences_dialog: false,
             errors: [],
-            preference: -1
+            preference: -1,
+            loading_text: "",
+
+            course_info: [
+                {
+                    id: 1,
+                    name: 'Adv. Software Engineering',
+                    children: [
+                        {id: 2, name: 'Log 5    -   due 4/5/20'},
+                        {id: 3, name: 'Log 6    -   due 5/3/20'},
+                    ],
+                },
+                {
+                    id: 4,
+                    name: 'Adv. Machine Learning',
+                    children: [
+                        {id: 5, name: 'HW 1     - due 2/2/21'},
+                        {id: 6, name: 'Research Topic   -   due 2/4/21'},
+                    ],
+                },
+                {
+                    id: 1,
+                    name: 'Adv. Software Engineering',
+                    children: [
+                        {id: 2, name: 'Log 5    -   due 4/5/20'},
+                        {id: 3, name: 'Log 6    -   due 5/3/20'},
+                    ],
+                },
+                {
+                    id: 4,
+                    name: 'Adv. Machine Learning',
+                    children: [
+                        {id: 5, name: 'HW 1     - due 2/2/21'},
+                        {id: 6, name: 'Research Topic   -   due 2/4/21'},
+                    ],
+                },
+                {
+                    id: 1,
+                    name: 'Adv. Software Engineering',
+                    children: [
+                        {id: 2, name: 'Log 5    -   due 4/5/20'},
+                        {id: 3, name: 'Log 6    -   due 5/3/20'},
+                    ],
+                },
+                {
+                    id: 4,
+                    name: 'Adv. Machine Learning',
+                    children: [
+                        {id: 5, name: 'HW 1     - due 2/2/21'},
+                        {id: 6, name: 'Research Topic   -   due 2/4/21'},
+                    ],
+                },
+                {
+                    id: 1,
+                    name: 'Adv. Software Engineering',
+                    children: [
+                        {id: 2, name: 'Log 5    -   due 4/5/20'},
+                        {id: 3, name: 'Log 6    -   due 5/3/20'},
+                    ],
+                },
+                {
+                    id: 4,
+                    name: 'Adv. Machine Learning',
+                    children: [
+                        {id: 5, name: 'HW 1     - due 2/2/21'},
+                        {id: 6, name: 'Research Topic   -   due 2/4/21'},
+                    ],
+                },
+                {
+                    id: 1,
+                    name: 'Adv. Software Engineering',
+                    children: [
+                        {id: 2, name: 'Log 5    -   due 4/5/20'},
+                        {id: 3, name: 'Log 6    -   due 5/3/20'},
+                    ],
+                },
+                {
+                    id: 4,
+                    name: 'Adv. Machine Learning',
+                    children: [
+                        {id: 5, name: 'HW 1     - due 2/2/21'},
+                        {id: 6, name: 'Research Topic   -   due 2/4/21'},
+                    ],
+                },
+            ]
         }),
 
         props: {
@@ -134,6 +220,7 @@
                 console.log("sending post request");
 
                 if(!this.preferences_dialog) {
+                    this.loading_text = "Logging you in, please wait";
                     axios.post(`http://jsonplaceholder.typicode.com/posts`,
                         {
                             username: 'username',
@@ -144,8 +231,13 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            this.preferences_dialog = true;
-                            this.$emit('notify', 'Login successful!,success');
+                            if(!response.success) {
+                                throw "Login Failed!"
+                            } else {
+                                this.course_info = response.courses;
+                                this.preferences_dialog = true;
+                                this.$emit('notify', 'Login successful!,success');
+                            }
                         })
                         .catch(e => {
                             this.errors.push(e)
@@ -153,6 +245,7 @@
                             this.$emit('notify', 'Login failed!,error');
                         })
                 } else {
+                    this.loading_text = "Updating your preferences";
                     axios.post(`http://jsonplaceholder.typicode.com/posts`,
                         {
                             username:       'username',
@@ -164,8 +257,12 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            this.preferences_dialog = false;
-                            this.$emit('notify', 'Preferences updated!,success');
+                            if(!response.success) {
+                                throw "Failed to update preferences!!"
+                            } else {
+                                this.preferences_dialog = false;
+                                this.$emit('notify', 'Preferences updated!,success');
+                            }
                         })
                         .catch(e => {
                             this.errors.push(e)
