@@ -131,13 +131,18 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            this.registration_dialog = false;
-                            this.$emit('notify', 'Registration successful!,success');
+                            if(!response.success) {
+                                this.loading_dialog = false;
+                                this.$emit('notify', 'Registration failed - please try again!,error');
+                            } else {
+                                this.registration_dialog = false;
+                                this.$emit('notify', 'Registration successful!,success');
+                            }
                         })
                         .catch(e => {
-                            this.errors.push(e)
+                            this.errors.push(e);
                             this.loading_dialog = false;
-                            this.$emit('notify', 'Registration failed, please try again!,error');
+                            this.$emit('notify', 'Registration failed please try again!,error');
                         })
                 }
             }
