@@ -2,37 +2,51 @@ import datetime as dt
 import requests
 from datetime import timezone
 import canvasbotdb
-from flask import Flask,request
-from flask import CORS
+from flask import Blueprint
 
-app = Flask(__name__)
-CORS(app)
-
-#@app.route("/")
-#def index():
+cb_controller = Blueprint('cb_controller',__name__,static_folder="static",template_folder="templates")
 
 
-@app.route("/register_user", methods=["POST", "GET"])
-def register_user():
-    result = canvasbotdb.create_user(test_user_name,"Test2")
+
+#@app.route("/register_user", methods=["POST", "GET"])
+@cb_controller.route("/register_user")
+def register_user(user_login_info):
+    result = canvasbotdb.create_user(user_login_info.get("username"),user_login_info.get("password"))
     if result == True:
-        token="token_here"
-        
-        return "Returned True"#gather_info(token)
+        return gather_info(user_login_info.get("api"))
     else:
         return "Returned False"#False
     
-@app.route("/login_user",methods=["POST", "GET"])
+#@app.route("/login_user",methods=["POST", "GET"])
 def login_user(user_login_info):
-    if canvasbotdb.verify_credentials(user_login_info[0],user_login_info[1]):
-        return canvasbotdb.get_user_assignments(user_login_info[0])
+    if canvasbotdb.verify_credentials(user_login_info.get("username"),user_login_info.get("password")):
+        result = canvasbotdb.get_user_assignments((user_login_info.get("username"))
+        course_list = []
+        id = 1
+        for course_assignment in result:
+    
+            course = course_assignment[0]
+            assignment = course_assignment[1]
+            due = course_assignment[2]
+            if len(course_list) == 0:
+             course_list.append({"id":id,"name":course,"children":[{"name": assignment,"due":due}]})
+             continue
+            if not any(d['name'] == course for d in course_list):
+                id = id + 1
+                course_list.append({"id":id,"name":course,"children":[{"name": assignment,"due":due}]})
+            else:
+                for d in course_list:
+                    if d['name'] == course:
+                        child_item_list = d.get("children")
+                        child_item_list.append({"name": assignment,"due":due})
+        return {"success":"true","courses":course_list}
     else:
-        return "{success: false, courses: []}"}
+        return {success: false, courses: []}
     
 
-def update_preferences(user_login_info,preference):
-    if canvasbotdb.verify_credentials(user_login_info[0],user_login_info[1]):
-        canvasbotdb.create_preferences(user_login_info[0],preference)
+def update_preferences(user_info):
+    if canvasbotdb.verify_credentials(user_info.get("username"),user_info.get("password")):
+        return canvasbotdb.create_preferences(user_info.get("username"),user_info.get("preferences"))
     else:
         return False
 
@@ -89,4 +103,4 @@ def gather_info(API_TOKEN):
     except:
         print("An error occured: {}".format(courses))
         return False
-app.run(debug=True)
+#app.run(debug=True)
