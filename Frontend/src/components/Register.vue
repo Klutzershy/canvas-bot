@@ -119,7 +119,7 @@
 
                     this.loading_dialog = true;
                     console.log("sending post request");
-                    axios.post(`http://jsonplaceholder.typicode.com/posts`,
+                    axios.post(`http://127.0.0.1:5000/register_user`,
                         {
                             username:   document.getElementById("username").value,
                             email:      document.getElementById("email").value,
@@ -131,7 +131,7 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            if(!response.success) {
+                            if(!response.data.success) {
                                 this.loading_dialog = false;
                                 this.$emit('notify', 'Registration failed - please try again!,error');
                             } else {
