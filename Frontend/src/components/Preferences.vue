@@ -221,7 +221,7 @@
 
                 if(!this.preferences_dialog) {
                     this.loading_text = "Logging you in, please wait";
-                    axios.post(`http://jsonplaceholder.typicode.com/posts`,
+                    axios.post(`http://127.0.0.1:5000/login`,
                         {
                             username: 'username',
                             password: 'password'
@@ -231,10 +231,10 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            if(!response.success) {
+                            if(!response.data.success) {
                                 throw "Login Failed!"
                             } else {
-                                this.course_info = response.courses;
+                                this.course_info = response.data.courses;
                                 this.preferences_dialog = true;
                                 this.$emit('notify', 'Login successful!,success');
                             }
@@ -246,7 +246,7 @@
                         })
                 } else {
                     this.loading_text = "Updating your preferences";
-                    axios.post(`http://jsonplaceholder.typicode.com/posts`,
+                    axios.post(`http://127.0.0.1:5000/update_preferences`,
                         {
                             username:       'username',
                             password:       'password',
@@ -257,7 +257,7 @@
                             await this.sleep(1000);
                             this.loading_dialog = false;
                             console.log(response);
-                            if(!response.success) {
+                            if(!response.data.success) {
                                 throw "Failed to update preferences!!"
                             } else {
                                 this.preferences_dialog = false;
