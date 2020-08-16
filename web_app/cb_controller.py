@@ -2,22 +2,32 @@ import datetime as dt
 import requests
 from datetime import timezone
 import canvasbotdb
+from flask import Flask,request
+from flask import CORS
 
-course_list=[]
-test_user_name = "username"
-#canvasbotdb.init()
+app = Flask(__name__)
+CORS(app)
 
+#@app.route("/")
+#def index():
+
+
+@app.route("/register_user", methods=["POST", "GET"])
 def register_user():
     result = canvasbotdb.create_user(test_user_name,"Test2")
     if result == True:
         token="token_here"
-        return gather_info(token)
+        
+        return "Returned True"#gather_info(token)
     else:
-        return False
+        return "Returned False"#False
     
-
+@app.route("/login_user",methods=["POST", "GET"])
 def login_user(user_login_info):
-    return canvasbotdb.verify_credentials(user_login_info[0],user_login_info[1])
+    if canvasbotdb.verify_credentials(user_login_info[0],user_login_info[1]):
+        return canvasbotdb.get_user_assignments(user_login_info[0])
+    else:
+        return "{success: false, courses: []}"}
     
 
 def update_preferences(user_login_info,preference):
@@ -72,12 +82,11 @@ def gather_info(API_TOKEN):
                     print("Due: {}".format(formatted_due_date))
                     #Insert Assignment into the 
                     canvasbotdb.create_assignment(course["name"],assignment_name,formatted_due_date)
-                    assignment_list.append({"name":assignment_name,"due_date":formatted_due_date})
-                course.update({"assignments":assignment_list})
+                    assignment_list.append({"name":assignment_name,"due":formatted_due_date})
+                course.update({"children":assignment_list})
             info_result = course_list
             return True
     except:
         print("An error occured: {}".format(courses))
         return False
-register_user()
-login_user([test_user_name,"Test2"])
+app.run(debug=True)
