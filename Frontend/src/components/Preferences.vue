@@ -11,7 +11,7 @@
                             class="subtitle-1 text-center"
                             cols="12"
                     >
-                        Logging you in, please wait
+                        {{ loading_text }}
                     </v-col>
                     <v-col cols="6">
                         <v-progress-linear
@@ -74,7 +74,8 @@
             loading_dialog: false,
             preferences_dialog: false,
             errors: [],
-            preference: -1
+            preference: -1,
+            loading_text: ""
         }),
 
         props: {
@@ -134,6 +135,7 @@
                 console.log("sending post request");
 
                 if(!this.preferences_dialog) {
+                    this.loading_text = "Logging you in, please wait";
                     axios.post(`http://jsonplaceholder.typicode.com/posts`,
                         {
                             username: 'username',
@@ -153,6 +155,7 @@
                             this.$emit('notify', 'Login failed!,error');
                         })
                 } else {
+                    this.loading_text = "Updating your preferences";
                     axios.post(`http://jsonplaceholder.typicode.com/posts`,
                         {
                             username:       'username',
