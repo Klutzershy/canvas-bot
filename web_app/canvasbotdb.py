@@ -1,7 +1,7 @@
 import os
 import sqlite3
 from sqlite3 import Error
-import hashlib
+import hashlib, uuid
 
 db_file = r"./canvasbot.db"
 
@@ -25,9 +25,10 @@ def create_table(create_table_sql):
         return False
 
 def create_user(username, password, email):
-    password = password.encode()
-    salt = os.urandom(16)
-    password_hash = hashlib.pbkdf2_hmac("sha256", password, salt, 100000)
+    password = password.encode('utf-8')
+    salt = uuid.uuid4().hex
+    salt = salt.encode('utf-8')
+    password_hash = hashlib.sha256(password+ salt).hexdigest()
     user = (username, password_hash, salt, email)
     ret_val = insert_user(user)
     return ret_val
@@ -168,9 +169,15 @@ def user_registered(username):
 
 def verify_credentials(username, password):
     user = select_user(username)
+    print(user)
     if user is not None:
-        password = password.encode()
-        password_hash = hashlib.pbkdf2_hmac("sha256", password, user[3], 100000)
+        password = password.encode('utf-8')
+        db_salt = user[3]
+        print(db_salt)
+        password_hash = hashlib.sha256(password+ db_salt).hexdigest()
+        print(password_hash)
+        print(user[2])
+        print(password_hash == user[2])
         return (password_hash == user[2])
     else:
         return False
