@@ -27,16 +27,16 @@ def login_user(user_login_info):
             assignment = course_assignment[1]
             due = course_assignment[2]
             if len(course_list) == 0:
-             course_list.append({"id":id,"name":course,"children":[{"name": assignment,"due":due}]})
+             course_list.append({"id":id,"name":course,"children":[{"name": assignment+" - "+due[:10]}]})
              continue
             if not any(d['name'] == course for d in course_list):
                 id = id + 1
-                course_list.append({"id":id,"name":course,"children":[{"name: ":assignment, " - due:":due}]})
+                course_list.append({"id":id,"name":course,"children":[{"name: ":assignment +" - "+due[:10]}]})
             else:
                 for d in course_list:
                     if d['name'] == course:
                         child_item_list = d.get("children")
-                        child_item_list.append({"name": assignment,"due":due})
+                        child_item_list.append({"name": assignment +" - "+due[:10]})
         #print({"success":"true","courses":course_list})
         return {"success":True,"courses":course_list}
     else:

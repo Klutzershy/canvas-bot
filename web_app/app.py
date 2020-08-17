@@ -17,7 +17,7 @@ def hello_world():
 def register():
     post_data = request.get_json() #This gets the json object sent by the post request
 
-    print(post_data)
+    #print(post_data)
     if register_user(post_data):
         response = {"success": True}
         return Response(json.dumps(response), mimetype='application/json')
@@ -30,7 +30,7 @@ def register():
 def login():
     post_data = request.get_json()
 
-    print(post_data)
+    #print(post_data)
 
     return login_user(post_data)
 
@@ -38,7 +38,7 @@ def login():
 def preferences():
     post_data = request.get_json()
 
-    print(post_data)
+    #print(post_data)
 
     return update_preferences(post_data)
 
