@@ -22,7 +22,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="courses_dialog=false">Close</v-btn>
+                    <v-btn color="blue darken-1" text @click="printem">Close</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -35,11 +35,18 @@
         name: "Courses",
 
         data: () => ({
-            courses_dialog: false
+            courses_dialog: false,
         }),
 
         props: {
-            course_info: String
+            course_info: Array
+        },
+
+        methods: {
+            printem() {
+                console.log(this.course_info);
+                this.courses_dialog=false
+            }
         }
 
     }
