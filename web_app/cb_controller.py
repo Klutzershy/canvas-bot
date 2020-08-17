@@ -15,6 +15,7 @@ def register_user(user_login_info):
     
 
 def login_user(user_login_info):
+    print("Verifying User..")
     if verify_credentials(user_login_info.get("username"),user_login_info.get("password")):
         print("Verified!")
         result = get_user_assignments((user_login_info.get("username")))
@@ -40,6 +41,7 @@ def login_user(user_login_info):
         #print({"success":"true","courses":course_list})
         return {"success":True,"courses":course_list}
     else:
+        print("Failed Verification!")
         return {"success": False, "courses": []}
     
 
