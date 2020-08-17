@@ -1,30 +1,28 @@
 import datetime as dt
 import requests
 from datetime import timezone
-import canvasbotdb
-from flask import Blueprint
+from .canvasbotdb import *
 
-cb_controller = Blueprint('cb_controller',__name__,static_folder="static",template_folder="templates")
+init()
 
-
-
-#@app.route("/register_user", methods=["POST", "GET"])
-@cb_controller.route("/register_user")
 def register_user(user_login_info):
-    result = canvasbotdb.create_user(user_login_info.get("username"),user_login_info.get("password"))
+    result = create_user(user_login_info.get("username"),user_login_info.get("password"))
     if result == True:
-        return gather_info(user_login_info.get("api"))
+        print("User created sucessfully! Gathering Canvas Information...")
+        return gather_info(user_login_info.get("username"),user_login_info.get("api"))
     else:
-        return "Returned False"#False
+        return False
     
-#@app.route("/login_user",methods=["POST", "GET"])
+
 def login_user(user_login_info):
-    if canvasbotdb.verify_credentials(user_login_info.get("username"),user_login_info.get("password")):
-        result = canvasbotdb.get_user_assignments((user_login_info.get("username"))
+    if verify_credentials(user_login_info.get("username"),user_login_info.get("password")):
+        print("Verified!")
+        result = get_user_assignments((user_login_info.get("username")))
+        print(result)
         course_list = []
         id = 1
+        print("Getting courses")
         for course_assignment in result:
-    
             course = course_assignment[0]
             assignment = course_assignment[1]
             due = course_assignment[2]
@@ -33,37 +31,47 @@ def login_user(user_login_info):
              continue
             if not any(d['name'] == course for d in course_list):
                 id = id + 1
-                course_list.append({"id":id,"name":course,"children":[{"name": assignment,"due":due}]})
+                course_list.append({"id":id,"name":course,"children":[{"name: ":assignment, " - due:":due}]})
             else:
                 for d in course_list:
                     if d['name'] == course:
                         child_item_list = d.get("children")
                         child_item_list.append({"name": assignment,"due":due})
+        print({"success":"true","courses":course_list})
         return {"success":"true","courses":course_list}
     else:
-        return {success: false, courses: []}
+        return {"success": "false", "courses": []}
     
 
 def update_preferences(user_info):
-    if canvasbotdb.verify_credentials(user_info.get("username"),user_info.get("password")):
-        return canvasbotdb.create_preferences(user_info.get("username"),user_info.get("preferences"))
-    else:
-        return False
-
-def gather_info(API_TOKEN):
-    info_result = None
+    username = user_info.get("username")
+    password = user_info.get("password")
+    preferences = user_info.get("preferences")
     
+    result = create_preferences(username,preferences)
+     #   print(result)
+    if result:
+        return {"success": True }
+    else:
+        return {"success": False }
+
+def gather_info(username, API_TOKEN):
+    info_result = None
+    course_list = []
     #Will attempt to parse the response to json, should print out an error if it fails
     try:
+        print("Grabbing Canvas Information...")
         courses = requests.get(url="https://rowan.instructure.com/api/v1/courses?access_token={}".format(API_TOKEN))
+        print("Converting Info to Json...")
         json_courses = courses.json()
-    
 
+        #print(json_courses)
 
         for jcourse in json_courses:
             course_id = jcourse.get("id")
             course_name = jcourse.get("name")
-        
+            print(course_id)
+            print(course_name)
             #Appears to grab other courses that are not visible anymore and are set as None.
             #Not adding the None courses because there is nothing to grab.
             if course_name == None:
@@ -71,35 +79,31 @@ def gather_info(API_TOKEN):
             course_dict = {"id":course_id,"name":course_name}
             course_list.append(course_dict)
 
-            #Loop through list of courses
-            for course in course_list:
-                try:
-                    result = requests.get(url="https://rowan.instructure.com/api/v1/courses/{id}/assignments?access_token={api}".format(id=course['id'], api=API_TOKEN))
+        #Loop through list of courses
+        for course in course_list:
+            print("Grabbing data for {}...".format(course))
+            result = requests.get(url="https://rowan.instructure.com/api/v1/courses/{id}/assignments?access_token={api}".format(id=course['id'], api=API_TOKEN))
 
-                    json_results = result.json()
-                except:
-                    print("An error occured accessing course: {} {}".format(course['name'],result))
-                    return False
-        
-                #Create a course
-                canvasbotdb.create_course(test_user_name,course["name"])
-                print("Course: {}".format(course["name"]))
-                assignment_list=[]
-                for i in json_results:
-                    #Get the assignment name and due date
-                    assignment_name = i.get("name")
-                    due_date = i.get("due_at")
-                    #Time is converted from utc to local time
-                    formatted_due_date = dt.datetime.strptime(due_date,"%Y-%m-%dT%H:%M:%SZ")
-                    formatted_due_date = formatted_due_date.replace(tzinfo=timezone.utc).astimezone(tz=None)
-                    print("Name: {}".format(assignment_name))
-                    print("Due: {}".format(formatted_due_date))
-                    #Insert Assignment into the 
-                    canvasbotdb.create_assignment(course["name"],assignment_name,formatted_due_date)
-                    assignment_list.append({"name":assignment_name,"due":formatted_due_date})
-                course.update({"children":assignment_list})
-            info_result = course_list
-            return True
+            json_results = result.json()
+            #Create a course
+            create_course(username,course["name"])
+            print("Course: {}".format(course["name"]))
+            assignment_list=[]
+            for i in json_results:
+                #Get the assignment name and due date
+                assignment_name = i.get("name")
+                due_date = i.get("due_at")
+                #Time is converted from utc to local time
+                formatted_due_date = dt.datetime.strptime(due_date,"%Y-%m-%dT%H:%M:%SZ")
+                formatted_due_date = formatted_due_date.replace(tzinfo=timezone.utc).astimezone(tz=None)
+                print("Name: {}".format(assignment_name))
+                print("Due: {}".format(formatted_due_date))
+                #Insert Assignment into the 
+                create_assignment(course["name"],assignment_name,formatted_due_date)
+                assignment_list.append({"name":assignment_name,"due":formatted_due_date})
+            course.update({"children":assignment_list})
+        #    info_result = course_list
+        return True
     except:
         print("An error occured: {}".format(courses))
         return False

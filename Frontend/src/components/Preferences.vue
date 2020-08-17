@@ -223,8 +223,8 @@
                     this.loading_text = "Logging you in, please wait";
                     axios.post(`http://127.0.0.1:5000/login`,
                         {
-                            username: 'username',
-                            password: 'password'
+                            username: this.username,
+                            password: this.password
                         },
                         {timeout: 15000})
                         .then(async response => {
@@ -248,8 +248,8 @@
                     this.loading_text = "Updating your preferences";
                     axios.post(`http://127.0.0.1:5000/update_preferences`,
                         {
-                            username:       'username',
-                            password:       'password',
+                            username:       this.username,
+                            password:       this.password,
                             preferences:    this.preference
                         },
                         {timeout: 15000})
