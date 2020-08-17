@@ -6,7 +6,7 @@ from .canvasbotdb import *
 init()
 
 def register_user(user_login_info):
-    result = create_user(user_login_info.get("username"),user_login_info.get("password"))
+    result = create_user(user_login_info.get("username"),user_login_info.get("password"),user_login_info.get("email"))
     if result == True:
         print("User created sucessfully! Gathering Canvas Information...")
         return gather_info(user_login_info.get("username"),user_login_info.get("api"))
@@ -18,7 +18,7 @@ def login_user(user_login_info):
     if verify_credentials(user_login_info.get("username"),user_login_info.get("password")):
         print("Verified!")
         result = get_user_assignments((user_login_info.get("username")))
-        print(result)
+        #print(result)
         course_list = []
         id = 1
         print("Getting courses")
@@ -37,10 +37,10 @@ def login_user(user_login_info):
                     if d['name'] == course:
                         child_item_list = d.get("children")
                         child_item_list.append({"name": assignment,"due":due})
-        print({"success":"true","courses":course_list})
-        return {"success":"true","courses":course_list}
+        #print({"success":"true","courses":course_list})
+        return {"success":True,"courses":course_list}
     else:
-        return {"success": "false", "courses": []}
+        return {"success": False, "courses": []}
     
 
 def update_preferences(user_info):

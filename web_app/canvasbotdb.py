@@ -167,8 +167,6 @@ def user_registered(username):
         return True
 
 def verify_credentials(username, password):
-    print(username)
-    print(password)
     user = select_user(username)
     if user is not None:
         password = password.encode()
