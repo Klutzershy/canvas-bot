@@ -99,7 +99,7 @@ def gather_info(username, API_TOKEN):
                 print("Name: {}".format(assignment_name))
                 print("Due: {}".format(formatted_due_date))
                 #Insert Assignment into the 
-                create_assignment(course["name"],assignment_name,formatted_due_date)
+                create_assignment(username,course["name"],assignment_name,formatted_due_date)
                 assignment_list.append({"name":assignment_name,"due":formatted_due_date})
             course.update({"children":assignment_list})
         #    info_result = course_list

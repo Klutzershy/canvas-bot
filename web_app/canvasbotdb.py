@@ -50,11 +50,15 @@ def create_course(username, course_name) :
         ret_val = False
     return ret_val
 
-def create_assignment(course_name, assignment_title, due_date):
-    row = select_course(course_name)
-    if row is not None:
-        assignment = (row[0], assignment_title, due_date)
-        ret_val = insert_assignment(assignment)
+def create_assignment(username, course_name, assignment_title, due_date):
+    user = select_user(username)
+    if user is not None:
+        course = select_course(user[0], course_name)
+        if course is not None:
+            assignment = (course[0], assignment_title, due_date)
+            ret_val = insert_assignment(assignment)
+        else:
+            ret_val = False
     else:
         ret_val = False
     return ret_val
@@ -144,11 +148,11 @@ def select_user(username):
         print(e)
         return None
 
-def select_course(course_name):
+def select_course(user_id, course_name):
     try:
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
-        cur.execute("SELECT * FROM courses WHERE name = \"{cname}\"".format(cname = course_name))
+        cur.execute("SELECT * FROM courses WHERE name = \"{cname}\" AND user_id = {uid}".format(cname = course_name, uid = user_id))
         row = cur.fetchone()
         return row
     except Error as e:
